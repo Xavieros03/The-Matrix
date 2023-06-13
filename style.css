@@ -1,12 +1,66 @@
 html, body {
-    margin: 0;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+  margin: 0;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(18, 18, 18);
+}
   
-  canvas {
-    display: block;
+h1 {
+  text-align: center;
+}
+  
+canvas {
+  display: none;
+}
 
-  }
+#menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin-top: -20vh;
+
+}
+
+#messages {
+  font-family: 'VT323', 'Arial';
+  font-size: 80px;
+  margin: 0;
+}
+#gameName {
+  font-family: 'VT323', 'Arial';
+  font-size: 100px;
+  color:  rgb(3, 160, 98);
+  margin: 5rem 0;
+}
+
+div button {
+  position: relative;
+  display: inline-block;
+  background-color: rgb(3, 160, 98); 
+  color: white;
+  text-transform: uppercase; 
+  text-shadow: rgb(0, 0, 0) 0px 1px 2px; 
+  border-radius: 30px;
+  width: 350px;
+  height: 70px;
+  font-size: 40px;
+  font-family: 'VT323', 'Arial';
+  margin: 0 0 1rem;
+  cursor: pointer;
+}
+div button:hover{
+  box-shadow: 2px 5px 8px black;
+}
+
+#instructions {
+  position: absolute;
+  background-color: white;
+  height: 50vh;
+  width: 50vw;
+  display: none;
+}
+#instruccions

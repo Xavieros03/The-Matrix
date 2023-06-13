@@ -1,4 +1,6 @@
-
+const gameName = document.getElementById("gameName");
+const menu = document.getElementById("menu");
+const messages = document.getElementById("messages");
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -24,14 +26,11 @@ let greenBox = null;
 
 // obstacle related variables
 const obstacleRadius = 15;
-let obstacles = [];
+let obstacles = [1];
 const maxObstacles = 50; // Maximum number of obstacles
 let obstacleSpeedRange = { min: -5, max: 5 }; // Range of obstacle speeds
 
-const resetButton = document.getElementById("resetButton");
-let showMessage = false;
-
-
+let gameOver = false;
 const startButton = document.getElementById("startButton");
 
 let directions = {
@@ -41,12 +40,13 @@ let directions = {
   down: false,
 };
 
+const STORAGE_KEY = "highScore"
 let counter = 0;
-let highScore = localStorage.getItem("highScore") || 0;
-
-
+let highScore = localStorage.getItem(STORAGE_KEY) || 0;
 
 function initializeLevel() {
+  canvas.style.display = "block";
+
   // Initialize player position
   playerX = boxX;
   playerY = boxY + boxHeight / 2 - playerHeight / 2;
@@ -74,19 +74,19 @@ function generateObstacle() {
 }
 
 function drawPlayer() {
-  ctx.fillStyle = "blue";
+  ctx.fillStyle = "#03A062";
   ctx.fillRect(playerX, playerY, playerWidth, playerHeight);
 }
 
-function drawGreenBox() {
-  ctx.fillStyle = "green";
+function drawRedBox() {
+  ctx.fillStyle = "#D92121";
   if (!greenBox.collected) {
     ctx.fillRect(greenBox.x, greenBox.y, greenBoxWidth, greenBoxHeight);
   }
 }
 
 function drawObstacles() {
-  ctx.fillStyle = "red";
+  ctx.fillStyle = "#0065ff";
   obstacles.forEach((obstacle) => {
     ctx.beginPath();
     ctx.arc(obstacle.x, obstacle.y, obstacleRadius, 0, Math.PI * 2);
@@ -96,6 +96,9 @@ function drawObstacles() {
 }
 
 function handleKeyDown(event) {
+  if (!gameStarted || gameOver) {
+    return; // Prevent player movement if the game has not started
+  }
   switch (event.key) {
     case "ArrowLeft":
       directions.left = true;
@@ -109,8 +112,8 @@ function handleKeyDown(event) {
     case "ArrowDown":
       directions.down = true;
       break;
-    case "Enter":
-      resetButtonClick();
+    case "Escape":
+      resetGame();
       break;
   }
 }
@@ -129,10 +132,18 @@ function handleKeyUp(event) {
     case "ArrowDown":
       directions.down = false;
       break;
+    case "Enter":
+      if(!gameStarted || gameOver) {
+        startGame();
+      }
+      break;
   }
 }
 
 function updatePlayerPosition() {
+  if (gameOver) {
+    return; // Prevent updating player position if the game has ended
+  }
   if (directions.left === true && playerX > boxX) {
     playerVelocityX = -playerSpeed;
   } else if (directions.right === true && playerX + playerWidth < boxX + boxWidth) {
@@ -192,6 +203,9 @@ function checkCollision() {
       // Generate new obstacles if the counter reaches multiples of 10
       generateObstacle();
     }
+    if(counter === 1){
+      generateObstacle();
+    }
     // Generate a new green box
     const randomX = Math.random() * (boxWidth - greenBoxWidth) + boxX;
     const randomY = Math.random() * (boxHeight - greenBoxHeight) + boxY;
@@ -203,42 +217,23 @@ function checkCollision() {
   }
 }
 
-function drawMessage() {
-  if (showMessage) {
-    ctx.fillStyle = "Black";
-    ctx.font = "48px VT323";
-    ctx.fillText("Congratulations! New High Score: " + highScore, canvas.width / 2 - 330, canvas.height / 1.5);
-    resetButton.style.display = "block";
-  } else {
-    resetButton.style.display = "none";
-  }
-}
-
-function resetButtonClick() {
-  resetButton.style.display = "none";
-  resetGameAfterMessage();
-}
-
-resetButton.addEventListener("click", resetButtonClick);
-
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "white";
+  ctx.fillStyle = "rgb(18, 18, 18)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.strokeStyle = "black";
+  ctx.strokeStyle = "white";
   ctx.lineWidth = 4;
   ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
 
-  ctx.fillStyle = "black";
+  ctx.fillStyle = "white";
   ctx.font = "24px VT323";
   ctx.fillText("Counter: " + counter, 10, 30);
   ctx.fillText("High Score: " + highScore, 150, 30);
 
-  drawMessage();
   drawPlayer();
-  drawGreenBox();
+  drawRedBox();
   drawObstacles();
   checkCollision();
 }
@@ -247,64 +242,71 @@ function update() {
   updatePlayerPosition();
   updateObstacles();
   draw();
-  requestAnimationFrame(update);
+  if(gameStarted) {
+    requestAnimationFrame(update);
+  }
 }
 
 let gameStarted = false;
-let animationFrameId = null;
 
 function resetGame() {
   if (counter > highScore) {
     highScore = counter;
-    showMessage = true;
-    localStorage.setItem("highScore", highScore); 
+    messages.innerHTML =`New HighScore = ${highScore}`;
+    messages.style.color = "red"
+    messages.style.fontSize = "45px"
+    localStorage.setItem(STORAGE_KEY, highScore); 
+  } else {
+    messages.innerHTML = "Game Over";
+    messages.style.color = "#0065ff"
   }
+  gameOver = !gameOver;
    // Reset player position
-   playerX = canvas.width / 2 - playerWidth / 2;
-   playerY = canvas.height / 2 - playerHeight / 2;
+   playerX = boxX;
+   playerY = boxY + (boxHeight - playerHeight) / 2;
    // Reset player velocity
    playerVelocityX = 0;
    playerVelocityY = 0;
    // Reset Counter
    counter = 0;
    // Reset obstacles
-   obstacles = [];
-   // Add event listeners
-   document.addEventListener("keydown", handleKeyDown);
-   document.addEventListener("keyup", handleKeyUp);
-   gameStarted = false;
+   obstacles = [1];
+   if(gameOver) {
+    canvas.style.display = "none";
+    menu.style.display = "flex";
+   } else {
+    canvas.style.display = "block";
+    menu.style.display = "none";
+   }
+
  }
-  
-
-
-
-function resetGameAfterMessage() {
-  showMessage = false;
-  resetGame();
-}
 
 function startGame() {
-  if (gameStarted) {
-    resetGameAfterMessage(); // Restart the game
-  }
-  
-
-  // Add event listeners
-  document.addEventListener("keydown", handleKeyDown);
-  document.addEventListener("keyup", handleKeyUp);
-  // Start the game loop
-  if (!animationFrameId) {
+  if(gameStarted){
+    messages.innerHTML = ""
+    resetGame()
+  }  else {
+    gameStarted = true;
+    gameOver = false;
+    // Start the game loop
     initializeLevel();
-    animationFrameId = requestAnimationFrame(update);
+    requestAnimationFrame(update);
     draw();
   }
-
-  gameStarted = true;
+  menu.style.display = "none"
 }
+  
+// Add event listeners
+document.addEventListener("keydown", handleKeyDown);
+document.addEventListener("keyup", handleKeyUp);
 
 startButton.addEventListener("click", startGame);
-resetGame()
 
-
-
-
+const instructions = document.getElementById("instructions")
+function toggleInstructions() {
+  if (instructions.style.display === "block") {
+    instructions.style.display = "none"
+  } else {
+    instructions.style.display = "block"
+  }
+}

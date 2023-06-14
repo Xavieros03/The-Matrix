@@ -51,6 +51,7 @@ div button {
   font-family: 'VT323', 'Arial';
   margin: 0 0 1rem;
   cursor: pointer;
+  left: 5px;
 }
 div button:hover{
   box-shadow: 2px 5px 8px black;
@@ -58,9 +59,44 @@ div button:hover{
 
 #instructions {
   position: absolute;
-  background-color: white;
+  background-color: rgb(18, 18, 18);
   height: 50vh;
-  width: 50vw;
+  width: 40vw;
   display: none;
+  border: 1px solid rgb(3, 160, 98);
 }
-#instruccions
+
+#XBtn{
+  position: absolute;
+  display: inline-block;
+  background-color: rgb(3, 160, 98); 
+  color: white;
+  text-transform: uppercase; 
+  text-shadow: rgb(0, 0, 0) 0px 1px 2px; 
+  border-radius: 30px;
+  width: 100px;
+  height: 50px;
+  font-size: 40px;
+  font-family: 'VT323', 'Arial';
+  margin: 0 0 1rem;
+  cursor: pointer;
+  left: 34.2vw;
+  top: 12px;
+}
+
+#instructionsText{
+  color:rgb(3, 160, 98);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-family: 'VT323', 'Arial';
+}
+#instructionsText h2{
+  margin-top: 50px;
+  font-size: 50px;
+}
+#instructionsText p{
+  font-size: 32px;
+  margin: 10px;
+}
